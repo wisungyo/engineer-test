@@ -15,13 +15,17 @@ Describe **3 architectural decisions** you made. For each, explain:
 
 **Decision 1: [Name your decision]**
 
-_Context:_
+_Context:_ I need to make recipe list page which including search and pagination.
 
 _Options considered:_
 
-_Decision and trade-offs:_
+1. Create UI and the logic in the same place for quick development
 
-_With more time I'd:_
+2. Separate the logic and UI for better and more maintainable.
+
+_Decision and trade-offs:_ I make it in the same place. I choose that for quick development. But it makes the code less maintainable. Moreover if the code grows bigger.
+
+_With more time I'd:_ I will split the logic and the UI component. like using custom hooks.
 
 ---
 
@@ -53,11 +57,9 @@ _With more time I'd:_
 
 If you noticed any issues in the existing scaffold code (before building your own feature), describe them here:
 
-- **File and line**:
-- **Description**: What the bug was
-- **Fix applied**: What you did (or why you chose not to fix it)
-
-_(Leave this section blank if you found no issues.)_
+- **File and line**: src/app/recipes-example/page.tsx | line 65
+- **Description**: Search result is not applied to the list
+- **Fix applied**: I create new search component which applicable in the recipe list.
 
 ---
 
@@ -65,9 +67,9 @@ _(Leave this section blank if you found no issues.)_
 
 Disclose every AI tool you used. Be specific.
 
-| Tool | Task(s) | Representative prompt | What you kept | What you changed or rejected |
-| ---- | ------- | --------------------- | ------------- | ---------------------------- |
-|      |         |                       |               |                              |
+| Tool        | Task(s)                                                                                                                                                                                                                                       | Representative prompt                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | What you kept                                                                                 | What you changed or rejected |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------- |
+| Claude Code | Implement recipe search and filtering in recipes-example: keyword search across recipe content, tag multi-select filter, difficulty filter, and enforce validation constraints for title uniqueness, total time, ingredients, tags, and steps | you are senior software engineer in here. here i have nextjs project using mongo as the db n using react query. in this page : src/app/recipes-example/page.tsx I have list of recipe. i want you to create these - Search recipes by keyword. Search should work across recipe content. - Filter recipes by tags (multi-select) and by difficulty. during this development, you also need to follow these rules: 1. Title must be unique — case-insensitive and after trimming whitespace 2. Total time must be valid — prepMin + cookMin must be greater than 0 and at most 1440 minutes (24 hours) 3. Ingredients — no duplicate ingredient names (case-insensitive); minimum 1 ingredient, maximum 50 4. Tags — maximum 5 tags; each tag must be 2–20 characters matching ^[a-z0-9-]+$ 5. Steps — each step must be 5–500 characters; maximum 30 steps | Mostly I kept. Because I prompt a specific requirement and AI does like what I need it to do. |                              |
 
 _Why this matters: we're evaluating your judgment in working with AI tools, not whether you used them._
 
@@ -77,9 +79,8 @@ _Why this matters: we're evaluating your judgment in working with AI tools, not 
 
 List improvements you would make if you had additional time, in priority order:
 
-1.
-2.
-3.
+1. Expand automated test coverage for critical paths: validation edge cases, search/filter combinations, and mutation flows (create/update/delete) to reduce regression risk.
+2. Tidy up the code a little more. Since I think it's better to separate UI with logic. Example like creating custom hooks and call it in the UI component where it need.
 
 ---
 
