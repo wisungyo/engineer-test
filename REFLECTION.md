@@ -13,7 +13,7 @@ Describe **3 architectural decisions** you made. For each, explain:
 - The trade-off you accepted
 - What you would change with more time
 
-**Decision 1: [Name your decision]**
+**Decision 1: UI and Logic Separation**
 
 _Context:_ I need to make recipe list page which including search and pagination.
 
