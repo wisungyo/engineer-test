@@ -20,6 +20,7 @@ import { recipeKeys } from "@/lib/recipe-keys";
 import type { RecipeFilters } from "@/lib/recipe-keys";
 import type { TRecipeDocument } from "@/lib/schemas/recipe";
 import RecipeDetailModal from "./RecipeDetailModal";
+import RecipeEditModal from "./RecipeEditModal";
 
 const DIFFICULTIES = ["easy", "medium", "hard"] as const;
 
@@ -69,6 +70,7 @@ export default function RecipesExamplePage() {
     const [servings, setServings] = useState(4);
 
     const [selectedRecipe, setSelectedRecipe] = useState<TRecipeDocument | null>(null);
+    const [editingRecipe, setEditingRecipe] = useState<TRecipeDocument | null>(null);
 
     const [searchInput, setSearchInput] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -267,7 +269,16 @@ export default function RecipesExamplePage() {
                 </>
             )}
 
-            <RecipeDetailModal recipe={selectedRecipe} onClose={() => setSelectedRecipe(null)} />
+            <RecipeDetailModal
+                recipe={selectedRecipe}
+                onClose={() => setSelectedRecipe(null)}
+                onEdit={(r) => { setSelectedRecipe(null); setEditingRecipe(r); }}
+            />
+            <RecipeEditModal
+                recipe={editingRecipe}
+                onClose={() => setEditingRecipe(null)}
+                onSaved={(updated) => { setEditingRecipe(null); setSelectedRecipe(updated); }}
+            />
         </Container>
     );
 }

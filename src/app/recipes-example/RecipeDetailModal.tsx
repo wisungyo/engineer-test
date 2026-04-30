@@ -15,6 +15,7 @@ import type { TRecipeDocument } from "@/lib/schemas/recipe";
 interface RecipeDetailModalProps {
     recipe: TRecipeDocument | null;
     onClose: () => void;
+    onEdit: (recipe: TRecipeDocument) => void;
 }
 
 const difficultyColor = {
@@ -23,7 +24,7 @@ const difficultyColor = {
     hard: "error",
 } as const;
 
-export default function RecipeDetailModal({ recipe, onClose }: RecipeDetailModalProps) {
+export default function RecipeDetailModal({ recipe, onClose, onEdit }: RecipeDetailModalProps) {
     return (
         <Dialog open={recipe !== null} onClose={onClose} maxWidth="sm" fullWidth scroll="paper">
             {recipe && (
@@ -67,7 +68,7 @@ export default function RecipeDetailModal({ recipe, onClose }: RecipeDetailModal
                                 <ListItem key={i} disableGutters sx={{ py: 0.25 }}>
                                     <ListItemText
                                         primary={`${ing.qty} ${ing.unit} ${ing.name}`}
-                                        primaryTypographyProps={{ variant: "body2" }}
+                                        slotProps={{ primary: { variant: "body2" } }}
                                     />
                                 </ListItem>
                             ))}
@@ -84,7 +85,7 @@ export default function RecipeDetailModal({ recipe, onClose }: RecipeDetailModal
                                 <ListItem key={i} disableGutters alignItems="flex-start" sx={{ py: 0.5 }}>
                                     <ListItemText
                                         primary={`${i + 1}. ${step}`}
-                                        primaryTypographyProps={{ variant: "body2" }}
+                                        slotProps={{ primary: { variant: "body2" } }}
                                     />
                                 </ListItem>
                             ))}
@@ -98,6 +99,7 @@ export default function RecipeDetailModal({ recipe, onClose }: RecipeDetailModal
 
                     <DialogActions>
                         <Button onClick={onClose}>Close</Button>
+                        <Button variant="contained" onClick={() => onEdit(recipe)}>Edit</Button>
                     </DialogActions>
                 </>
             )}
