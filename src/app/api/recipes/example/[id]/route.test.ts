@@ -13,7 +13,7 @@ vi.mock("@/lib/db", () => ({
     connectDB: mockConnectDB,
 }));
 
-vi.mock("@/lib/schemas/recipe", () => ({
+vi.mock("@/lib/models/recipe", () => ({
     RecipeModel: {
         findOne: mockFindOne,
         findByIdAndUpdate: mockFindByIdAndUpdate,
