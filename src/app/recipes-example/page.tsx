@@ -21,6 +21,7 @@ import type { RecipeFilters } from "@/lib/recipe-keys";
 import type { TRecipeDocument } from "@/lib/schemas/recipe";
 import RecipeDetailModal from "./RecipeDetailModal";
 import RecipeEditModal from "./RecipeEditModal";
+import RecipeCreateModal from "./RecipeCreateModal";
 
 const DIFFICULTIES = ["easy", "medium", "hard"] as const;
 
@@ -69,6 +70,7 @@ export default function RecipesExamplePage() {
     const [title, setTitle] = useState("");
     const [servings, setServings] = useState(4);
 
+    const [createModalOpen, setCreateModalOpen] = useState(false);
     const [selectedRecipe, setSelectedRecipe] = useState<TRecipeDocument | null>(null);
     const [editingRecipe, setEditingRecipe] = useState<TRecipeDocument | null>(null);
 
@@ -119,9 +121,14 @@ export default function RecipesExamplePage() {
 
     return (
         <Container maxWidth="md" sx={{ py: 4 }}>
-            <Typography variant="h4" sx={{ mb: 1 }}>
-                Example: Recipe List + Quick Add
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                <Typography variant="h4" sx={{ flex: 1 }}>
+                    Example: Recipe List + Quick Add
+                </Typography>
+                <Button variant="contained" onClick={() => setCreateModalOpen(true)}>
+                    New Recipe
+                </Button>
+            </Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 This page demonstrates the conventions used in this scaffold. Review the source (
                 <code>src/app/recipes-example/page.tsx</code>, <code>src/lib/recipe-keys.ts</code>) before building your
@@ -269,10 +276,16 @@ export default function RecipesExamplePage() {
                 </>
             )}
 
+            <RecipeCreateModal
+                open={createModalOpen}
+                onClose={() => setCreateModalOpen(false)}
+                onCreated={(r) => { setCreateModalOpen(false); setSelectedRecipe(r); }}
+            />
             <RecipeDetailModal
                 recipe={selectedRecipe}
                 onClose={() => setSelectedRecipe(null)}
                 onEdit={(r) => { setSelectedRecipe(null); setEditingRecipe(r); }}
+                onDeleted={() => setSelectedRecipe(null)}
             />
             <RecipeEditModal
                 recipe={editingRecipe}
