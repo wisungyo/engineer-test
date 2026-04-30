@@ -17,7 +17,7 @@ vi.mock("@/lib/db", () => ({
     connectDB: mockConnectDB,
 }));
 
-vi.mock("@/lib/schemas/recipe", () => ({
+vi.mock("@/lib/models/recipe", () => ({
     RecipeModel: {
         distinct: mockDistinct,
         find: mockFind,
@@ -25,6 +25,9 @@ vi.mock("@/lib/schemas/recipe", () => ({
         findOne: mockFindOne,
         create: mockCreate,
     },
+}));
+
+vi.mock("@/lib/schemas/recipe", () => ({
     RecipeFormSchema: {
         safeParse: mockSafeParse,
     },
