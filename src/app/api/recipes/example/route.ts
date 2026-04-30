@@ -17,7 +17,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json((tags as string[]).sort());
     }
 
-    const limit = Math.min(Number(searchParams.get('limit') ?? '20'), 100);
+    const pageSize = Math.min(Math.max(1, Number(searchParams.get('pageSize') ?? '10')), 50);
+    const page = Math.max(1, Number(searchParams.get('page') ?? '1'));
     const search = searchParams.get('search')?.trim();
     const tagsParam = searchParams.get('tags');
     const difficulty = searchParams.get('difficulty');
@@ -46,8 +47,21 @@ export async function GET(request: NextRequest) {
       query.difficulty = difficulty;
     }
 
-    const recipes = await RecipeModel.find(query).limit(limit).lean();
-    return NextResponse.json(recipes);
+    const [data, total] = await Promise.all([
+      RecipeModel.find(query)
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .lean(),
+      RecipeModel.countDocuments(query),
+    ]);
+
+    return NextResponse.json({
+      data,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });

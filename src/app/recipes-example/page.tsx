@@ -16,6 +16,7 @@ import Alert from "@mui/material/Alert";
 import Autocomplete from "@mui/material/Autocomplete";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Pagination from "@mui/material/Pagination";
 import { recipeKeys } from "@/lib/recipe-keys";
 import type { RecipeFilters } from "@/lib/recipe-keys";
 import type { TRecipeDocument } from "@/lib/schemas/recipe";
@@ -24,15 +25,29 @@ import RecipeEditModal from "./RecipeEditModal";
 import RecipeCreateModal from "./RecipeCreateModal";
 
 const DIFFICULTIES = ["easy", "medium", "hard"] as const;
+const PAGE_SIZE = 10;
 
-async function fetchExampleRecipes(filters: NonNullable<RecipeFilters>): Promise<TRecipeDocument[]> {
+type PaginatedRecipes = {
+    data: TRecipeDocument[];
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+};
+
+async function fetchExampleRecipes(
+    filters: NonNullable<RecipeFilters>,
+    page: number,
+): Promise<PaginatedRecipes> {
     const params = new URLSearchParams();
     if (filters.search) params.set("search", filters.search);
     if (filters.tags?.length) params.set("tags", filters.tags.join(","));
     if (filters.difficulty) params.set("difficulty", filters.difficulty);
+    params.set("page", String(page));
+    params.set("pageSize", String(PAGE_SIZE));
     const res = await fetch(`/api/recipes/example?${params.toString()}`);
     if (!res.ok) throw new Error("Failed to fetch recipes");
-    return res.json() as Promise<TRecipeDocument[]>;
+    return res.json() as Promise<PaginatedRecipes>;
 }
 
 async function fetchAllTags(): Promise<string[]> {
@@ -78,11 +93,16 @@ export default function RecipesExamplePage() {
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         const timer = setTimeout(() => setDebouncedSearch(searchInput.trim()), 300);
         return () => clearTimeout(timer);
     }, [searchInput]);
+
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch, selectedTags, selectedDifficulty]);
 
     const filters: NonNullable<RecipeFilters> = {
         search: debouncedSearch || undefined,
@@ -91,13 +111,17 @@ export default function RecipesExamplePage() {
     };
 
     const {
-        data: recipes,
+        data: result,
         isLoading,
         error,
     } = useQuery({
-        queryKey: recipeKeys.list(filters),
-        queryFn: () => fetchExampleRecipes(filters),
+        queryKey: [...recipeKeys.list(filters), page],
+        queryFn: () => fetchExampleRecipes(filters, page),
     });
+
+    const recipes = result?.data ?? [];
+    const total = result?.total ?? 0;
+    const totalPages = result?.totalPages ?? 0;
 
     const { data: allTags = [] } = useQuery({
         queryKey: ["recipes", "distinct", "tags"],
@@ -223,10 +247,10 @@ export default function RecipesExamplePage() {
 
             {error && <Alert severity="error">{error instanceof Error ? error.message : "Load failed"}</Alert>}
 
-            {recipes && (
+            {result && (
                 <>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {recipes.length} recipe{recipes.length !== 1 ? "s" : ""} found
+                        {total} recipe{total !== 1 ? "s" : ""} found
                     </Typography>
                     <Stack spacing={2} data-testid="recipe-list">
                         {recipes.length === 0 && (
@@ -273,6 +297,16 @@ export default function RecipesExamplePage() {
                             </Card>
                         ))}
                     </Stack>
+                    {totalPages > 1 && (
+                        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+                            <Pagination
+                                count={totalPages}
+                                page={page}
+                                onChange={(_, value) => setPage(value)}
+                                color="primary"
+                            />
+                        </Box>
+                    )}
                 </>
             )}
 
