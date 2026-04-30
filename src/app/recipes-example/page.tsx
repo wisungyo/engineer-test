@@ -35,10 +35,7 @@ type PaginatedRecipes = {
     totalPages: number;
 };
 
-async function fetchExampleRecipes(
-    filters: NonNullable<RecipeFilters>,
-    page: number,
-): Promise<PaginatedRecipes> {
+async function fetchExampleRecipes(filters: NonNullable<RecipeFilters>, page: number): Promise<PaginatedRecipes> {
     const params = new URLSearchParams();
     if (filters.search) params.set("search", filters.search);
     if (filters.tags?.length) params.set("tags", filters.tags.join(","));
@@ -147,42 +144,10 @@ export default function RecipesExamplePage() {
         <Container maxWidth="md" sx={{ py: 4 }}>
             <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                 <Typography variant="h4" sx={{ flex: 1 }}>
-                    Example: Recipe List + Quick Add
+                    Recipe List + Quick Add
                 </Typography>
                 <Button variant="contained" onClick={() => setCreateModalOpen(true)}>
                     New Recipe
-                </Button>
-            </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                This page demonstrates the conventions used in this scaffold. Review the source (
-                <code>src/app/recipes-example/page.tsx</code>, <code>src/lib/recipe-keys.ts</code>) before building your
-                own implementation.
-            </Typography>
-
-            <Box
-                component="form"
-                onSubmit={handleSubmit}
-                data-testid="quick-add-form"
-                sx={{ display: "flex", gap: 2, mb: 4, flexWrap: "wrap" }}
-            >
-                <TextField
-                    label="Recipe title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    size="small"
-                    inputProps={{ "data-testid": "quick-add-title-input" }}
-                    sx={{ flex: 1, minWidth: 200 }}
-                />
-                <TextField
-                    label="Servings"
-                    type="number"
-                    value={servings}
-                    onChange={(e) => setServings(Number(e.target.value))}
-                    size="small"
-                    sx={{ width: 110 }}
-                />
-                <Button type="submit" variant="contained" data-testid="quick-add-submit">
-                    Add
                 </Button>
             </Box>
 
@@ -313,18 +278,27 @@ export default function RecipesExamplePage() {
             <RecipeCreateModal
                 open={createModalOpen}
                 onClose={() => setCreateModalOpen(false)}
-                onCreated={(r) => { setCreateModalOpen(false); setSelectedRecipe(r); }}
+                onCreated={(r) => {
+                    setCreateModalOpen(false);
+                    setSelectedRecipe(r);
+                }}
             />
             <RecipeDetailModal
                 recipe={selectedRecipe}
                 onClose={() => setSelectedRecipe(null)}
-                onEdit={(r) => { setSelectedRecipe(null); setEditingRecipe(r); }}
+                onEdit={(r) => {
+                    setSelectedRecipe(null);
+                    setEditingRecipe(r);
+                }}
                 onDeleted={() => setSelectedRecipe(null)}
             />
             <RecipeEditModal
                 recipe={editingRecipe}
                 onClose={() => setEditingRecipe(null)}
-                onSaved={(updated) => { setEditingRecipe(null); setSelectedRecipe(updated); }}
+                onSaved={(updated) => {
+                    setEditingRecipe(null);
+                    setSelectedRecipe(updated);
+                }}
             />
         </Container>
     );

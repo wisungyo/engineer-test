@@ -17,6 +17,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
 import Alert from "@mui/material/Alert";
 import { recipeKeys } from "@/lib/recipe-keys";
+import { RecipeFormSchema } from "@/lib/schemas/recipe";
 import type { TIngredient, TRecipeDocument } from "@/lib/schemas/recipe";
 
 interface RecipeEditModalProps {
@@ -65,6 +66,7 @@ export default function RecipeEditModal({ recipe, onClose, onSaved }: RecipeEdit
     const [tags, setTags] = useState<string[]>([]);
     const [ingredients, setIngredients] = useState<TIngredient[]>([{ name: "", qty: 0, unit: "" }]);
     const [steps, setSteps] = useState<string[]>([""]);
+    const [formError, setFormError] = useState<string | null>(null);
 
     useEffect(() => {
         if (recipe) {
@@ -77,6 +79,8 @@ export default function RecipeEditModal({ recipe, onClose, onSaved }: RecipeEdit
             setTags(recipe.tags);
             setIngredients(recipe.ingredients.length > 0 ? recipe.ingredients : [{ name: "", qty: 0, unit: "" }]);
             setSteps(recipe.steps.length > 0 ? recipe.steps : [""]);
+            setFormError(null);
+            mutation.reset();
         }
     }, [recipe]);
 
@@ -90,7 +94,7 @@ export default function RecipeEditModal({ recipe, onClose, onSaved }: RecipeEdit
     });
 
     function handleSave() {
-        mutation.mutate({
+        const payload = {
             title,
             description,
             servings,
@@ -100,7 +104,14 @@ export default function RecipeEditModal({ recipe, onClose, onSaved }: RecipeEdit
             tags,
             ingredients: ingredients.filter((ing) => ing.name.trim().length > 0),
             steps: steps.filter((s) => s.trim().length > 0),
-        });
+        };
+        const validation = RecipeFormSchema.safeParse(payload);
+        if (!validation.success) {
+            setFormError(validation.error.issues[0]?.message ?? "Validation failed");
+            return;
+        }
+        setFormError(null);
+        mutation.mutate(payload);
     }
 
     function updateIngredient(index: number, field: keyof TIngredient, value: string | number) {
@@ -137,11 +148,9 @@ export default function RecipeEditModal({ recipe, onClose, onSaved }: RecipeEdit
 
                     <DialogContent dividers>
                         <Stack spacing={2.5}>
-                            {mutation.isError && (
+                            {(formError ?? (mutation.isError ? true : null)) && (
                                 <Alert severity="error">
-                                    {mutation.error instanceof Error
-                                        ? mutation.error.message
-                                        : "Something went wrong"}
+                                    {formError ?? (mutation.error instanceof Error ? mutation.error.message : "Something went wrong")}
                                 </Alert>
                             )}
 
@@ -172,7 +181,7 @@ export default function RecipeEditModal({ recipe, onClose, onSaved }: RecipeEdit
                                     onChange={(e) => setServings(Number(e.target.value))}
                                     size="small"
                                     sx={{ width: 110 }}
-                                    inputProps={{ min: 1 }}
+                                    slotProps={{ htmlInput: { min: 1 } }}
                                 />
                                 <TextField
                                     label="Prep (min)"
@@ -181,7 +190,7 @@ export default function RecipeEditModal({ recipe, onClose, onSaved }: RecipeEdit
                                     onChange={(e) => setPrepMin(Number(e.target.value))}
                                     size="small"
                                     sx={{ width: 120 }}
-                                    inputProps={{ min: 0 }}
+                                    slotProps={{ htmlInput: { min: 0 } }}
                                 />
                                 <TextField
                                     label="Cook (min)"
@@ -190,7 +199,7 @@ export default function RecipeEditModal({ recipe, onClose, onSaved }: RecipeEdit
                                     onChange={(e) => setCookMin(Number(e.target.value))}
                                     size="small"
                                     sx={{ width: 120 }}
-                                    inputProps={{ min: 0 }}
+                                    slotProps={{ htmlInput: { min: 0 } }}
                                 />
                             </Box>
 
@@ -272,7 +281,7 @@ export default function RecipeEditModal({ recipe, onClose, onSaved }: RecipeEdit
                                                 size="small"
                                                 placeholder="Qty"
                                                 sx={{ width: 80 }}
-                                                inputProps={{ min: 0, step: "any" }}
+                                                slotProps={{ htmlInput: { min: 0, step: "any" } }}
                                             />
                                             <TextField
                                                 value={ing.unit}

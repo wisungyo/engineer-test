@@ -17,6 +17,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Chip from "@mui/material/Chip";
 import Alert from "@mui/material/Alert";
 import { recipeKeys } from "@/lib/recipe-keys";
+import { RecipeFormSchema } from "@/lib/schemas/recipe";
 import type { TCreateRecipeInput, TIngredient, TRecipeDocument } from "@/lib/schemas/recipe";
 
 interface RecipeCreateModalProps {
@@ -55,6 +56,7 @@ export default function RecipeCreateModal({ open, onClose, onCreated }: RecipeCr
     const [tags, setTags] = useState<string[]>([]);
     const [ingredients, setIngredients] = useState<TIngredient[]>(DEFAULT_INGREDIENTS);
     const [steps, setSteps] = useState<string[]>([""]);
+    const [formError, setFormError] = useState<string | null>(null);
 
     const mutation = useMutation({
         mutationFn: createRecipe,
@@ -76,6 +78,7 @@ export default function RecipeCreateModal({ open, onClose, onCreated }: RecipeCr
         setTags([]);
         setIngredients([{ name: "", qty: 0, unit: "" }]);
         setSteps([""]);
+        setFormError(null);
         mutation.reset();
     }
 
@@ -85,7 +88,7 @@ export default function RecipeCreateModal({ open, onClose, onCreated }: RecipeCr
     }
 
     function handleCreate() {
-        mutation.mutate({
+        const payload = {
             title,
             description,
             servings,
@@ -95,7 +98,14 @@ export default function RecipeCreateModal({ open, onClose, onCreated }: RecipeCr
             tags,
             ingredients: ingredients.filter((ing) => ing.name.trim().length > 0),
             steps: steps.filter((s) => s.trim().length > 0),
-        });
+        };
+        const validation = RecipeFormSchema.safeParse(payload);
+        if (!validation.success) {
+            setFormError(validation.error.issues[0]?.message ?? "Validation failed");
+            return;
+        }
+        setFormError(null);
+        mutation.mutate(payload);
     }
 
     function updateIngredient(index: number, field: keyof TIngredient, value: string | number) {
@@ -128,9 +138,9 @@ export default function RecipeCreateModal({ open, onClose, onCreated }: RecipeCr
 
             <DialogContent dividers>
                 <Stack spacing={2.5}>
-                    {mutation.isError && (
+                    {(formError ?? (mutation.isError ? true : null)) && (
                         <Alert severity="error">
-                            {mutation.error instanceof Error ? mutation.error.message : "Something went wrong"}
+                            {formError ?? (mutation.error instanceof Error ? mutation.error.message : "Something went wrong")}
                         </Alert>
                     )}
 
