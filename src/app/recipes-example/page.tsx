@@ -19,6 +19,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { recipeKeys } from "@/lib/recipe-keys";
 import type { RecipeFilters } from "@/lib/recipe-keys";
 import type { TRecipeDocument } from "@/lib/schemas/recipe";
+import RecipeDetailModal from "./RecipeDetailModal";
 
 const DIFFICULTIES = ["easy", "medium", "hard"] as const;
 
@@ -66,6 +67,8 @@ export default function RecipesExamplePage() {
 
     const [title, setTitle] = useState("");
     const [servings, setServings] = useState(4);
+
+    const [selectedRecipe, setSelectedRecipe] = useState<TRecipeDocument | null>(null);
 
     const [searchInput, setSearchInput] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -223,7 +226,13 @@ export default function RecipesExamplePage() {
                             </Typography>
                         )}
                         {recipes.map((recipe) => (
-                            <Card key={String(recipe._id)} data-testid="recipe-card">
+                            <Card
+                                key={String(recipe._id)}
+                                data-testid="recipe-card"
+                                role="button"
+                                onClick={() => setSelectedRecipe(recipe)}
+                                sx={{ cursor: "pointer" }}
+                            >
                                 <CardContent>
                                     <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
                                         <Typography variant="h6" sx={{ flex: 1 }}>
@@ -257,6 +266,8 @@ export default function RecipesExamplePage() {
                     </Stack>
                 </>
             )}
+
+            <RecipeDetailModal recipe={selectedRecipe} onClose={() => setSelectedRecipe(null)} />
         </Container>
     );
 }
